@@ -1,7 +1,6 @@
 
 from datetime import date
 import requests
-import pandas as pd
 from . import config,cache
 
 @cache.cache

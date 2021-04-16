@@ -1,0 +1,12 @@
+uvicorn>=0.13.4
+gunicorn>=20.1.0
+fastapi>=0.63.0
+uvloop>=0.15.2
+httptools>=0.1.1
+fitin>=0.2.0
+azure-appconfiguration>=1.1.1
+azure-common>=1.1.27
+azure-core>=1.13.0
+azure-identity>=1.5.0
+azure-keyvault-secrets>=4.2.0
+azure-storage-blob>=12.8.0
