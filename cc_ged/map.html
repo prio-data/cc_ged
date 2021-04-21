@@ -1,0 +1,53 @@
+<head>
+   <link rel="stylesheet" href="">
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+      crossorigin=""/>
+   <style>
+      #app {
+         height: 100vh;
+      }
+   </style>
+</head>
+<body>
+   <div id="app"></div>
+   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+      crossorigin=""></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+   <script id="data-url"></script>
+   <script>
+      const map = L.map("app")
+      map.setView([51,0],13)
+      const tiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+         ).addTo(map)
+      const shapes = L.geoJSON(undefined,{
+         onEachFeature: (ftr,lyr)=>{
+            let tbl = document.createElement("table")
+
+            let row
+            Object.entries(ftr.properties).forEach((entry)=>{
+
+               row = document.createElement("tr")
+               key = document.createElement("td")
+               key.innerText = entry[0]
+               val = document.createElement("td")
+               val.innerText = entry[1]
+               row.appendChild(key)
+               row.appendChild(val)
+               tbl.appendChild(row)
+            })
+            lyr.bindPopup(tbl)
+         }
+      })
+      shapes.addTo(map)
+      axios.get(url)
+         .then((r) => {
+            shapes.addData(r.data)
+            map.fitBounds(shapes.getBounds())
+         })
+         .catch((e)=>{
+            console.log(`Could not retrieve data: ${e}`)
+         })
+   </script>
+</body>
