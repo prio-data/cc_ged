@@ -1,6 +1,5 @@
-import io
-import json
 from functools import partial
+from shapely import geometry,ops
 import shapely
 import pyproj
 from pyproj.enums import TransformDirection as TD
@@ -51,10 +50,10 @@ def buffer(geojson,meters=50000):
 
         f,i = [partial(utm_transformer.transform,direction=d) for d in [TD.FORWARD,TD.INVERSE]]
 
-        point = shapely.geometry.Point(feature["geometry"]["coordinates"])
-        utm_point = shapely.ops.transform(f,point)
+        point = geometry.Point(feature["geometry"]["coordinates"])
+        utm_point = ops.transform(f,point)
         buffered = utm_point.buffer(meters)
-        buffered = shapely.ops.transform(i,buffered)
+        buffered = ops.transform(i,buffered)
 
         geojson["features"][idx]["geometry"] = shapely.geometry.mapping(buffered)
 
