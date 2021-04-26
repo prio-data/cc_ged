@@ -5,7 +5,7 @@ from functools import reduce
 from operator import add
 from fastapi import FastAPI,Response
 from bs4 import BeautifulSoup
-from . import config,fetch,cache,quarters,spatial
+from . import config,fetch,cache,quarters,spatial,error_handling
 
 app = FastAPI()
 
@@ -43,6 +43,7 @@ def ged_buffered(country:int,year:int,quarter:int,buffer:int):
     return spatial.buffer(ged_points(country,year,quarter),meters=buffer)
 
 @app.get("/{country:int}/{year:int}/{quarter:int}/points")
+@error_handling.proxy_http_err
 def handle_points(country:int,year:int,quarter:int):
     """
     Returns GED events as points
@@ -50,6 +51,7 @@ def handle_points(country:int,year:int,quarter:int):
     return ged_points(country,year,quarter)
 
 @app.get("/{country:int}/{year:int}/{quarter:int}/buffered/{buffer}")
+@error_handling.proxy_http_err
 def handle_buffered(country:int,year:int,quarter:int,buffer:int):
     """
     Returns GED events as polygon-circles, buffered {buffer} meters around each point.
@@ -58,7 +60,7 @@ def handle_buffered(country:int,year:int,quarter:int,buffer:int):
 
 @app.get("/map/{data_path:path}")
 def show_map(data_path:str):
-    module_name = re.search("^[^\.]+",__name__)[0]
+    module_name = re.search(r"^[^\.]+",__name__)[0]
     html = importlib.resources.read_text(module_name,"map.html")
     soup = BeautifulSoup(html,"html.parser")
     data_inject = soup.find("script",id="data-url")
