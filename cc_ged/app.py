@@ -1,11 +1,9 @@
 
 import re
 import importlib
-from functools import reduce
-from operator import add
 from fastapi import FastAPI,Response
 from bs4 import BeautifulSoup
-from . import config,fetch,cache,quarters,spatial,error_handling
+from . import config,fetch,cache,spatial,error_handling
 
 app = FastAPI()
 
@@ -14,49 +12,28 @@ blob_cache = cache.BlobCache(
         config.config("GED_CACHE_CONTAINER_NAME")
     )
 
+@app.get("/{country:int}/{year:int}/{month:int}/points")
+@error_handling.proxy_http_err
 @cache.cache(blob_cache,use_json=True)
-def ged_points(country:int,year:int,quarter:int):
+def ged_points(country:int,year:int,month:int):
     """
-    Returns GED points as geopandas
+    Returns GED points for year - month as GeoJSON
     """
-    start,end = quarters.month_quarter_bounds(quarter) 
-
-    data = []
-
-    for m in range(start,end+1):
-        data.append(fetch.fetch_ged_events(country,year,m))
-
     try:
-        features = reduce(add,
-                [list(f) for f in map(spatial.response_to_geojson,data)]
-            )
-    except KeyError as ke:
-        return Response(f"Malformed data from GED API: {ke}",status_code=500)
-
+        assert month <= 12 and month >= 1
+    except AssertionError:
+        return Response("Month must be a number between 1 and 12!",status_code=400)
+    features = spatial.response_to_geojson(fetch.fetch_ged_events(country,year,month))
     return {
         "type": "FeatureCollection",
-        "features": features
+        "features": [*features]
     }
 
+@app.get("/{country:int}/{year:int}/{month:int}/buffered/{buffer:int}")
+@error_handling.proxy_http_err
 @cache.cache(blob_cache,use_json=True)
-def ged_buffered(country:int,year:int,quarter:int,buffer:int):
-    return spatial.buffer(ged_points(country,year,quarter),meters=buffer)
-
-@app.get("/{country:int}/{year:int}/{quarter:int}/points")
-@error_handling.proxy_http_err
-def handle_points(country:int,year:int,quarter:int):
-    """
-    Returns GED events as points
-    """
-    return ged_points(country,year,quarter)
-
-@app.get("/{country:int}/{year:int}/{quarter:int}/buffered/{buffer}")
-@error_handling.proxy_http_err
-def handle_buffered(country:int,year:int,quarter:int,buffer:int):
-    """
-    Returns GED events as polygon-circles, buffered {buffer} meters around each point.
-    """
-    return ged_buffered(country,year,quarter,buffer)
+def ged_buffered(country,year,month,buffer):
+    return spatial.buffer(ged_points(country,year,month),meters=buffer)
 
 @app.get("/map/{data_path:path}")
 def show_map(data_path:str):

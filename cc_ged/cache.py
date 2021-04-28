@@ -1,5 +1,6 @@
 
 import json
+import functools
 import pickle
 from azure.storage.blob import BlobServiceClient
 from azure.core.exceptions import  ResourceNotFoundError
@@ -53,6 +54,8 @@ def cache(blob_cache,use_json = True):
 
     def wrapper(fn):
         key = lambda *args,**kwargs: fn.__name__ + str(Sigstring(*args,**kwargs))
+
+        @functools.wraps(fn)
         def inner(*args,**kwargs):
             try:
                 result = deserialize(blob_cache[key(*args,**kwargs)])

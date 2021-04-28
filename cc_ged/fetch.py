@@ -57,6 +57,7 @@ def fetch_ged_events(country: int, year:int, month:int, page_size=10,politeness=
                     f"{next_url}: {str(data)}"
                     ) from ke
                 
+        events = [e for e in events if not e["latitude"] is None]
         time.sleep(politeness*random.random())
     return events 
 
