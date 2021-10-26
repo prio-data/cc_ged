@@ -8,7 +8,7 @@ from . import config,fetch,cache,spatial,error_handling
 app = FastAPI()
 
 blob_cache = cache.BlobCache(
-        config.config("STORAGE_CONNECTION_STRING"),
+        config.config("BLOB_STORAGE_CONNECTION_STRING"),
         config.config("GED_CACHE_CONTAINER_NAME")
     )
 

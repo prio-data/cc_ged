@@ -1,0 +1,8 @@
+
+from environs import Env
+
+env = Env()
+env.read_env()
+
+BLOB_STORAGE_CONNECTION_STRING = env.str("BLOB_STORAGE_CONNECTION_STRING")
+GED_CACHE_CONTAINER_NAME = env.str("GED_CACHE_CONTAINER_NAME")
