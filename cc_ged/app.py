@@ -3,13 +3,13 @@ import re
 import importlib
 from fastapi import FastAPI,Response
 from bs4 import BeautifulSoup
-from . import config,fetch,cache,spatial,error_handling
+from . import settings,fetch,cache,spatial,error_handling
 
 app = FastAPI()
 
 blob_cache = cache.BlobCache(
-        config.config("STORAGE_CONNECTION_STRING"),
-        config.config("GED_CACHE_CONTAINER_NAME")
+        settings.BLOB_STORAGE_CONNECTION_STRING,
+        settings.GED_CACHE_CONTAINER_NAME
     )
 
 @app.get("/{country:int}/{year:int}/{month:int}/points")
